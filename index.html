@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- Firebase CDNs (نسخة مستقرة ومعتمدة) -->
+<!-- Firebase CDNs (Firestore) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
   :root{
@@ -310,36 +310,45 @@
 const firebaseConfig = {
   apiKey: "AIzaSyD6UDuCBns0_zdWOhnLOX3OtKelHs3hGmc",
   authDomain: "altafawuk-center.firebaseapp.com",
-  databaseURL: "https://altafawuk-center-default-rtdb.firebaseio.com",
   projectId: "altafawuk-center",
   storageBucket: "altafawuk-center.firebasestorage.app",
   messagingSenderId: "499180495752",
   appId: "1:499180495752:web:b48e6d3b2d0a7f6cc103d"
 };
 
-// تهيئة التكافؤ وتفعيل خيار الاتصال البديل Long Polling لتجاوز حجب الشبكة
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db = firebase.firestore();
 
-// إجبار النظام على عدم الاعتماد الحر على WebSockets في بيئات القيود
-try {
-  db.goOffline();
-  db.goOnline();
-} catch(e) {}
+// تفعيل وضع Long-Polling لضمان عمل الخدمة تحت أي شبكة محجوبة
+db.settings({ experimentalForceLongPolling: true });
 
-db.ref('.info/connected').on('value', (snap) => {
+let allStudents = {};
+
+function setConnectedStatus(isOnline) {
   const dot = document.getElementById('connDot');
   const text = document.getElementById('connText');
-  if (snap.val() === true) {
+  if (isOnline) {
     dot.className = 'dot on';
     text.textContent = 'متصل بقاعدة البيانات';
   } else {
     dot.className = 'dot off';
-    text.textContent = 'جاري الاتصال...';
+    text.textContent = 'غير متصل';
   }
-});
+}
 
-let allStudents = {};
+// الاستماع المباشر لبيانات الطلاب من Cloud Firestore
+db.collection('students').onSnapshot((snapshot) => {
+  setConnectedStatus(true);
+  allStudents = {};
+  snapshot.forEach((doc) => {
+    allStudents[doc.id] = doc.data();
+  });
+  renderTable();
+  updateStats();
+}, (error) => {
+  setConnectedStatus(false);
+  console.error("Firestore Error: ", error);
+});
 
 function countWeekdayOccurrencesInMonth(weekday, year, month) {
   const date = new Date(year, month, 1);
@@ -392,7 +401,7 @@ regForm.addEventListener('submit', (e) => {
 
   if(!code || !name) return;
 
-  db.ref('students/' + code).set({
+  db.collection('students').doc(code).set({
     code, name, gradeLevel, studentPhone, guardianPhone, fees,
     feesPaid: false, scheduleDays, totalSessions, attendedSessions: 0, examGrade: 0
   }).then(() => {
@@ -415,14 +424,14 @@ barcodeInput.addEventListener('keypress', (e) => {
     const code = barcodeInput.value.trim();
     if (!code) return;
     
-    db.ref('students/' + code).once('value').then(snap => {
-      if(!snap.exists()) {
+    db.collection('students').doc(code).get().then(doc => {
+      if(!doc.exists) {
         scanAlert.className = 'show danger';
         scanAlert.textContent = 'الكود غير موجود في النظام!';
       } else {
-        const student = snap.val();
+        const student = doc.data();
         const newCount = (student.attendedSessions || 0) + 1;
-        db.ref('students/' + code).update({ attendedSessions: newCount }).then(() => {
+        db.collection('students').doc(code).update({ attendedSessions: newCount }).then(() => {
           scanAlert.className = 'show success';
           scanAlert.textContent = `تم تسجيل حضور: ${student.name}`;
         });
@@ -430,12 +439,6 @@ barcodeInput.addEventListener('keypress', (e) => {
       barcodeInput.value = '';
     });
   }
-});
-
-db.ref('students').on('value', (snap) => {
-  allStudents = snap.val() || {};
-  renderTable();
-  updateStats();
 });
 
 function updateStats() {
@@ -503,10 +506,10 @@ function renderTable() {
 document.getElementById('searchBox').addEventListener('input', renderTable);
 document.getElementById('filterGradeLevel').addEventListener('change', renderTable);
 
-function updateAttendance(code, val) { db.ref('students/' + code).update({ attendedSessions: Number(val) }); }
-function updateExam(code, val) { db.ref('students/' + code).update({ examGrade: Number(val) }); }
-function toggleFees(code, status) { db.ref('students/' + code).update({ feesPaid: status }); }
-function deleteStudent(code) { if (confirm('هل ترغب بحذف الطالب؟')) db.ref('students/' + code).remove(); }
+function updateAttendance(code, val) { db.collection('students').doc(code).update({ attendedSessions: Number(val) }); }
+function updateExam(code, val) { db.collection('students').doc(code).update({ examGrade: Number(val) }); }
+function toggleFees(code, status) { db.collection('students').doc(code).update({ feesPaid: status }); }
+function deleteStudent(code) { if (confirm('هل ترغب بحذف الطالب؟')) db.collection('students').doc(code).delete(); }
 </script>
 </body>
 </html>
