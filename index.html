@@ -9,9 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- Firebase CDNs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<!-- Firebase CDNs (نسخة مستقرة ومعتمدة) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
   :root{
@@ -30,205 +30,158 @@
     --red-bg:#fef2f2;
     --text:#0f172a;
     --muted:#64748b;
-    --muted-2:#94a3b8;
     --shadow-sm:0 1px 2px rgba(15,23,42,.04);
-    --shadow-md:0 4px 10px rgba(15,23,42,.06);
     --radius-lg:16px;
     --radius-sm:10px;
   }
   
-  *, *::before, *::after {
-    box-sizing: border-box !important;
-  }
+  *, *::before, *::after { box-sizing: border-box !important; }
   
   html, body {
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden;
     background: var(--bg);
     font-family: 'Cairo', sans-serif;
     color: var(--text);
   }
 
-  /* الشريط العلوي بعرض الشاشة بالكامل */
   header.topbar {
     width: 100% !important;
     background: linear-gradient(120deg, var(--indigo) 0%, var(--purple) 100%);
     color: #fff;
-    padding: 20px 24px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
-    box-shadow: 0 4px 20px rgba(79,70,229,.15);
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(79,70,229,.15);
   }
-  header.topbar .brand { display: flex; align-items: center; gap: 12px; }
+  header.topbar .brand { display: flex; align-items: center; gap: 10px; }
   header.topbar .brand .mark {
-    width: 44px; height: 44px; border-radius: 12px;
+    width: 40px; height: 40px; border-radius: 10px;
     background: rgba(255,255,255,.2);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 20px;
+    font-weight: 900; font-size: 18px;
   }
-  header.topbar h1 { font-size: 20px; font-weight: 800; margin: 0; }
-  header.topbar p { margin: 2px 0 0; font-size: 12px; opacity: 0.85; }
+  header.topbar h1 { font-size: 18px; font-weight: 800; margin: 0; }
+  header.topbar p { margin: 2px 0 0; font-size: 11px; opacity: 0.85; }
   
   header.topbar .conn-status {
-    font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px;
-    background: rgba(255,255,255,.18); display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 20px;
+    background: rgba(255,255,255,.18); display: flex; align-items: center; gap: 6px;
   }
-  header.topbar .dot { width: 9px; height: 9px; border-radius: 50%; background: #cbd5e1; }
+  header.topbar .dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; }
   header.topbar .dot.on { background: #34d399; }
   header.topbar .dot.off { background: #fca5a5; }
 
-  /* الحاوية الرئيسية للمحتوى */
-  main {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 20px;
-  }
+  main { width: 100% !important; padding: 15px; }
 
-  /* كروت الإحصائيات مستطيلة بعرض الشاشة */
-  .stats {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100% !important;
-    margin-bottom: 20px;
-  }
+  .stats { display: flex; flex-direction: column; gap: 10px; width: 100% !important; margin-bottom: 15px; }
   .stat-card {
     width: 100% !important;
     background: var(--card);
     border-radius: var(--radius-lg);
-    padding: 18px 20px;
+    padding: 16px;
     border: 1px solid var(--border-soft);
     box-shadow: var(--shadow-sm);
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    display: flex; align-items: center; gap: 14px;
   }
   .stat-card .icon {
-    width: 52px; height: 52px; border-radius: 14px;
+    width: 46px; height: 46px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 24px; flex-shrink: 0;
+    font-size: 22px; flex-shrink: 0;
   }
   .stat-card.students .icon { background: var(--indigo-bg); color: var(--indigo); }
   .stat-card.revenue .icon { background: var(--emerald-bg); color: var(--emerald-dark); }
-  .stat-card .num { font-size: 28px; font-weight: 900; line-height: 1; }
-  .stat-card .label { font-size: 13px; color: var(--muted); font-weight: 700; margin-top: 4px; }
+  .stat-card .num { font-size: 24px; font-weight: 900; line-height: 1; }
+  .stat-card .label { font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 3px; }
 
-  /* الشبكة الرئيسية */
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    width: 100% !important;
-  }
+  .grid { display: flex; flex-direction: column; gap: 15px; width: 100% !important; }
 
   .panel {
     background: var(--card);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-soft);
     box-shadow: var(--shadow-sm);
-    padding: 20px;
+    padding: 16px;
     width: 100% !important;
   }
-  .panel h2 {
-    font-size: 16px; font-weight: 800; margin: 0 0 4px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .panel .sub { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+  .panel h2 { font-size: 15px; font-weight: 800; margin: 0 0 4px; }
+  .panel .sub { font-size: 11px; color: var(--muted); margin: 0 0 12px; }
 
   input, select {
     font-family: 'Cairo', sans-serif;
     border: 1.5px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    font-size: 14px;
+    padding: 10px;
+    font-size: 13px;
     font-weight: 600;
     width: 100% !important;
     background: #fbfcfe;
     color: var(--text);
   }
-  input:focus, select:focus { outline: none; border-color: var(--indigo); background: #fff; }
   input[readonly] { background: var(--indigo-bg); color: var(--indigo-dark); font-weight: 800; }
   
-  #scanAlert { margin-top: 12px; padding: 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; display: none; }
+  #scanAlert { margin-top: 10px; padding: 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; display: none; }
   #scanAlert.show { display: block; }
-  #scanAlert.danger { background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
-  #scanAlert.success { background: var(--emerald-bg); color: var(--emerald-dark); border: 1px solid #a7f3d0; }
+  #scanAlert.danger { background: var(--red-bg); color: var(--red); }
+  #scanAlert.success { background: var(--emerald-bg); color: var(--emerald-dark); }
 
-  .field { margin-bottom: 14px; width: 100%; }
-  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field { margin-bottom: 12px; width: 100%; }
+  .field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-  .weekday-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .weekday-chips { display: flex; flex-wrap: wrap; gap: 5px; }
   .weekday-chips .chip {
-    display: flex; align-items: center; gap: 4px; background: #f1f5f9;
-    border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 12px;
-    font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; background: #f1f5f9;
+    border: 1px solid var(--border); border-radius: 15px; padding: 5px 10px;
+    font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer;
   }
   .weekday-chips .chip input { display: none; }
   .weekday-chips .chip.active { background: var(--indigo); border-color: transparent; color: #fff; }
 
   .btn {
     font-family: 'Cairo', sans-serif; border: none; border-radius: var(--radius-sm);
-    padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    width: 100%;
+    padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; width: 100%;
   }
   .btn-primary { background: linear-gradient(120deg, var(--indigo), var(--purple)); color: #fff; }
-  .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 6px; width: auto; }
-  .btn-whatsapp { background: #25D366; color: #fff; text-decoration: none; }
-  .btn-edit { background: var(--indigo-bg); color: var(--indigo-dark); }
+  .btn-sm { padding: 5px 8px; font-size: 11px; border-radius: 6px; width: auto; }
   .btn-delete { background: var(--red-bg); color: var(--red); }
 
-  #regMsg { margin-top: 12px; font-size: 13px; font-weight: 700; display: none; padding: 10px; border-radius: var(--radius-sm); }
+  #regMsg { margin-top: 10px; font-size: 12px; font-weight: 700; display: none; padding: 8px; border-radius: var(--radius-sm); }
   #regMsg.show { display: block; }
   #regMsg.success { background: var(--emerald-bg); color: var(--emerald-dark); }
   #regMsg.danger { background: var(--red-bg); color: var(--red); }
 
   .table-panel {
     background: var(--card); border-radius: var(--radius-lg);
-    border: 1px solid var(--border-soft); box-shadow: var(--shadow-sm); padding: 20px;
+    border: 1px solid var(--border-soft); box-shadow: var(--shadow-sm); padding: 16px;
     width: 100% !important; overflow: hidden;
   }
-  .table-panel .head-row {
-    display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;
-  }
-  
-  .filters-bar { display: flex; gap: 10px; flex-direction: column; }
+  .filters-bar { display: flex; gap: 8px; flex-direction: column; margin-bottom: 12px; }
 
   .table-scroll { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-soft); width: 100%; }
-  table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 13px; }
-  thead th { background: #f8fafc; color: var(--muted); font-weight: 800; text-align: right; padding: 12px 10px; border-bottom: 1px solid var(--border-soft); }
-  tbody td { padding: 12px 10px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
-  .cell-input { width: 55px !important; padding: 4px 6px; font-size: 12px; text-align: center; }
-  .code-pill { background: var(--indigo-bg); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 800; color: var(--indigo-dark); }
-  .fee-btn { border: none; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 12px; }
+  thead th { background: #f8fafc; color: var(--muted); font-weight: 800; text-align: right; padding: 10px 8px; border-bottom: 1px solid var(--border-soft); }
+  tbody td { padding: 10px 8px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+  .cell-input { width: 50px !important; padding: 4px; font-size: 11px; text-align: center; }
+  .code-pill { background: var(--indigo-bg); padding: 3px 6px; border-radius: 5px; font-size: 11px; font-weight: 800; color: var(--indigo-dark); }
+  .fee-btn { border: none; border-radius: 5px; padding: 5px 8px; font-size: 11px; font-weight: 800; cursor: pointer; }
   .fee-btn.paid { background: var(--emerald-bg); color: var(--emerald-dark); }
   .fee-btn.unpaid { background: var(--red-bg); color: var(--red); }
-  .row-actions { display: flex; gap: 4px; }
-  .empty-row td { text-align: center; color: var(--muted); padding: 30px; font-weight: 600; }
-  
-  #debugBanner {
-    background: #fef2f2; color: #991b1b; padding: 10px 15px; font-size: 12px; font-weight: 700;
-    text-align: center; border-bottom: 1px solid #fecaca; display: none;
-  }
+  .empty-row td { text-align: center; color: var(--muted); padding: 20px; font-weight: 600; }
 </style>
 </head>
 <body>
-
-<div id="debugBanner"></div>
 
 <header class="topbar">
   <div class="brand">
     <div class="mark">ت</div>
     <div>
       <h1>سنتر التفوق التعليمي</h1>
-      <p>لوحة التحكم المركزية - إدارة الطلاب</p>
+      <p>لوحة التحكم المركزية</p>
     </div>
   </div>
   <div class="conn-status">
@@ -238,7 +191,6 @@
 </header>
 
 <main>
-  <!-- كروت الإحصائيات بالعرض الكامل -->
   <section class="stats">
     <div class="stat-card students">
       <div class="icon">👥</div>
@@ -251,7 +203,7 @@
       <div class="icon">💰</div>
       <div>
         <div class="num" id="statRevenue">0</div>
-        <div class="label">إجمالي الإيرادات المحصلة للشهر الحالية (ج.م)</div>
+        <div class="label">إجمالي الإيرادات (ج.م)</div>
       </div>
     </div>
   </section>
@@ -266,7 +218,7 @@
 
     <div class="panel">
       <h2>➕ تسجيل طالب جديد</h2>
-      <p class="sub">أدخل بيانات الطالب مع تحديد الصف الدراسي</p>
+      <p class="sub">أدخل بيانات الطالب</p>
       <form id="regForm">
         <div class="field-row">
           <div class="field">
@@ -289,11 +241,11 @@
         <div class="field-row">
           <div class="field">
             <label>هاتف الطالب</label>
-            <input type="tel" id="f_studentPhone" placeholder="010xxxxxxxx">
+            <input type="tel" id="f_studentPhone">
           </div>
           <div class="field">
             <label>هاتف ولي الأمر</label>
-            <input type="tel" id="f_guardianPhone" placeholder="010xxxxxxxx">
+            <input type="tel" id="f_guardianPhone">
           </div>
         </div>
         <div class="field">
@@ -322,17 +274,15 @@
     </div>
 
     <div class="table-panel">
-      <div class="head-row">
-        <h2>📋 قائمة الطلاب</h2>
-        <div class="filters-bar">
-          <select id="filterGradeLevel">
-            <option value="all">جميع الصفوف الدراسية</option>
-            <option value="أول ثانوي">أول ثانوي</option>
-            <option value="ثاني ثانوي">ثاني ثانوي</option>
-            <option value="ثالث ثانوي">ثالث ثانوي</option>
-          </select>
-          <input type="text" id="searchBox" placeholder="بحث بالاسم أو الكود...">
-        </div>
+      <h2>📋 قائمة الطلاب</h2>
+      <div class="filters-bar" style="margin-top:10px;">
+        <select id="filterGradeLevel">
+          <option value="all">جميع الصفوف الدراسية</option>
+          <option value="أول ثانوي">أول ثانوي</option>
+          <option value="ثاني ثانوي">ثاني ثانوي</option>
+          <option value="ثالث ثانوي">ثالث ثانوي</option>
+        </select>
+        <input type="text" id="searchBox" placeholder="بحث بالاسم أو الكود...">
       </div>
       <div class="table-scroll">
         <table>
@@ -341,7 +291,6 @@
               <th>الكود</th>
               <th>الاسم</th>
               <th>الصف</th>
-              <th>الهاتف</th>
               <th>الحصص</th>
               <th>الامتحان</th>
               <th>المصاريف</th>
@@ -349,7 +298,7 @@
             </tr>
           </thead>
           <tbody id="studentsTbody">
-            <tr class="empty-row"><td colspan="8">جاري اتصال القاعدة...</td></tr>
+            <tr class="empty-row"><td colspan="7">جاري الاتصال...</td></tr>
           </tbody>
         </table>
       </div>
@@ -358,12 +307,6 @@
 </main>
 
 <script>
-const debugBanner = document.getElementById('debugBanner');
-function showDebug(msg) {
-  debugBanner.style.display = 'block';
-  debugBanner.textContent = msg;
-}
-
 const firebaseConfig = {
   apiKey: "AIzaSyD6UDuCBns0_zdWOhnLOX3OtKelHs3hGmc",
   authDomain: "altafawuk-center.firebaseapp.com",
@@ -374,26 +317,27 @@ const firebaseConfig = {
   appId: "1:499180495752:web:b48e6d3b2d0a7f6cc103d"
 };
 
+// تهيئة التكافؤ وتفعيل خيار الاتصال البديل Long Polling لتجاوز حجب الشبكة
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// إجبار النظام على عدم الاعتماد الحر على WebSockets في بيئات القيود
 try {
-  firebase.initializeApp(firebaseConfig);
-  var db = firebase.database();
-  
-  // تجربة الاتصال المباشر
-  db.ref('.info/connected').on('value', (snap) => {
-    const dot = document.getElementById('connDot');
-    const text = document.getElementById('connText');
-    if (snap.val() === true) {
-      dot.className = 'dot on';
-      text.textContent = 'متصل بقاعدة البيانات';
-      debugBanner.style.display = 'none';
-    } else {
-      dot.className = 'dot off';
-      text.textContent = 'جاري الاتصال...';
-    }
-  });
-} catch(err) {
-  showDebug('خطأ في تهيئة القواعد: ' + err.message);
-}
+  db.goOffline();
+  db.goOnline();
+} catch(e) {}
+
+db.ref('.info/connected').on('value', (snap) => {
+  const dot = document.getElementById('connDot');
+  const text = document.getElementById('connText');
+  if (snap.val() === true) {
+    dot.className = 'dot on';
+    text.textContent = 'متصل بقاعدة البيانات';
+  } else {
+    dot.className = 'dot off';
+    text.textContent = 'جاري الاتصال...';
+  }
+});
 
 let allStudents = {};
 
@@ -459,7 +403,7 @@ regForm.addEventListener('submit', (e) => {
     f_totalSessions.value = 0;
   }).catch(err => {
     regMsg.className = 'show danger';
-    regMsg.textContent = 'خطأ في الحفظ: ' + err.message;
+    regMsg.textContent = 'حدث خطأ: ' + err.message;
   });
 });
 
@@ -480,7 +424,7 @@ barcodeInput.addEventListener('keypress', (e) => {
         const newCount = (student.attendedSessions || 0) + 1;
         db.ref('students/' + code).update({ attendedSessions: newCount }).then(() => {
           scanAlert.className = 'show success';
-          scanAlert.textContent = `تم حضور: ${student.name} (${newCount} حصة)`;
+          scanAlert.textContent = `تم تسجيل حضور: ${student.name}`;
         });
       }
       barcodeInput.value = '';
@@ -492,8 +436,6 @@ db.ref('students').on('value', (snap) => {
   allStudents = snap.val() || {};
   renderTable();
   updateStats();
-}, (err) => {
-  showDebug('فشل جلب البيانات: ' + err.message);
 });
 
 function updateStats() {
@@ -518,7 +460,7 @@ function renderTable() {
   const keys = Object.keys(allStudents);
 
   if (keys.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">لا يوجد طلاب مسجلون حالياً.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">لا يوجد طلاب مسجلون حالياً.</td></tr>';
     return;
   }
 
@@ -535,7 +477,6 @@ function renderTable() {
       <td><span class="code-pill">${s.code}</span></td>
       <td><strong>${s.name}</strong></td>
       <td>${s.gradeLevel || '--'}</td>
-      <td>${s.studentPhone || '--'}</td>
       <td>
         <input type="number" class="cell-input" value="${s.attendedSessions || 0}" onchange="updateAttendance('${s.code}', this.value)">
       </td>
@@ -548,7 +489,24 @@ function renderTable() {
         </button>
       </td>
       <td>
-        <div class="row-actions">
-          <button class="btn btn-sm btn-delete" onclick="deleteStudent('${s.code}')">حذف</button>
-        </div>
-      </td
+        <button class="btn btn-sm btn-delete" onclick="deleteStudent('${s.code}')">حذف</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (count === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">لا توجد نتائج تطابق البحث.</td></tr>';
+  }
+}
+
+document.getElementById('searchBox').addEventListener('input', renderTable);
+document.getElementById('filterGradeLevel').addEventListener('change', renderTable);
+
+function updateAttendance(code, val) { db.ref('students/' + code).update({ attendedSessions: Number(val) }); }
+function updateExam(code, val) { db.ref('students/' + code).update({ examGrade: Number(val) }); }
+function toggleFees(code, status) { db.ref('students/' + code).update({ feesPaid: status }); }
+function deleteStudent(code) { if (confirm('هل ترغب بحذف الطالب؟')) db.ref('students/' + code).remove(); }
+</script>
+</body>
+</html>
