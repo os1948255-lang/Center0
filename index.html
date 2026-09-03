@@ -2,14 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سنتر التفوق التعليمي - لوحة التحكم الكاملة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>سنتر التفوق التعليمي - لوحة التحكم</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- Firebase -->
+<!-- Firebase CDNs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
@@ -33,207 +33,202 @@
     --muted-2:#94a3b8;
     --shadow-sm:0 1px 2px rgba(15,23,42,.04);
     --shadow-md:0 4px 10px rgba(15,23,42,.06);
-    --radius-lg:20px;
+    --radius-lg:16px;
     --radius-sm:10px;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;width:100%;}
-  body{
-    background:var(--bg);
-    font-family:'Cairo',sans-serif;
-    color:var(--text);
-    min-height:100vh;
+  
+  *, *::before, *::after {
+    box-sizing: border-box !important;
   }
   
-  header.topbar{
-    background:linear-gradient(120deg,var(--indigo) 0%,var(--purple) 100%);
-    color:#fff;
-    padding:26px 40px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap:wrap;
-    gap:14px;
-    width:100%;
-    box-shadow:0 8px 24px rgba(79,70,229,.18);
-  }
-  header.topbar .brand{display:flex;align-items:center;gap:15px;}
-  header.topbar .brand .mark{
-    width:46px;height:46px;border-radius:14px;
-    background:rgba(255,255,255,.16);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:20px;
-  }
-  header.topbar h1{font-size:22px;font-weight:800;margin:0;}
-  header.topbar p{margin:3px 0 0;font-size:13px;color:rgba(255,255,255,.78);font-weight:500;}
-  header.topbar .conn-status{
-    font-size:13px;font-weight:600;padding:8px 16px;border-radius:30px;
-    background:rgba(255,255,255,.14);display:flex;align-items:center;gap:8px;
-  }
-  header.topbar .dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;}
-  header.topbar .dot.on{background:#34d399;}
-  header.topbar .dot.off{background:#fca5a5;}
-
-  main{
-    width:100%;
-    max-width:100%;
-    margin:0;
-    padding:30px 40px 70px;
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden;
+    background: var(--bg);
+    font-family: 'Cairo', sans-serif;
+    color: var(--text);
   }
 
-  .stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
-    gap:20px;
-    margin-bottom:28px;
-    width:100%;
+  /* الشريط العلوي بعرض الشاشة بالكامل */
+  header.topbar {
+    width: 100% !important;
+    background: linear-gradient(120deg, var(--indigo) 0%, var(--purple) 100%);
+    color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(79,70,229,.15);
   }
-  .stat-card{
-    background:var(--card);
-    border-radius:var(--radius-lg);
-    padding:24px 30px;
-    border:1px solid var(--border-soft);
-    box-shadow:var(--shadow-sm);
-    display:flex;
-    align-items:center;
-    gap:20px;
-    width:100%;
+  header.topbar .brand { display: flex; align-items: center; gap: 12px; }
+  header.topbar .brand .mark {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 20px;
   }
-  .stat-card .icon{
-    width:65px;height:65px;border-radius:18px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:30px;flex-shrink:0;
-  }
-  .stat-card.students .icon{background:var(--indigo-bg);color:var(--indigo);}
-  .stat-card.revenue .icon{background:var(--emerald-bg);color:var(--emerald-dark);}
-  .stat-card .num{font-size:36px;font-weight:800;line-height:1.1;}
-  .stat-card .label{font-size:14px;color:var(--muted);font-weight:600;margin-top:4px;}
-
-  .grid{
-    display:grid;
-    grid-template-columns:440px 1fr;
-    gap:24px;
-    align-items:start;
-    width:100%;
-  }
-  @media (max-width:1100px){
-    .grid{grid-template-columns:1fr;}
-  }
-
-  .panel{
-    background:var(--card);
-    border-radius:var(--radius-lg);
-    border:1px solid var(--border-soft);
-    box-shadow:var(--shadow-sm);
-    padding:26px;
-    margin-bottom:24px;
-  }
-  .panel h2{
-    font-size:16.5px;font-weight:800;margin:0 0 6px;
-    display:flex;align-items:center;gap:9px;
-  }
-  .panel h2 .h-icon{
-    width:34px;height:34px;border-radius:10px;
-    background:var(--indigo-bg);color:var(--indigo);
-    display:flex;align-items:center;justify-content:center;font-size:16px;
-  }
-  .panel .sub{font-size:12.5px;color:var(--muted);margin:0 0 20px;line-height:1.6;}
-
-  input,select{
-    font-family:'Cairo',sans-serif;
-    border:1.5px solid var(--border);
-    border-radius:var(--radius-sm);
-    padding:12px 14px;
-    font-size:14px;
-    font-weight:500;
-    width:100%;
-    background:#fbfcfe;
-    color:var(--text);
-  }
-  input:focus,select:focus{outline:none;border-color:var(--indigo);background:#fff;}
-  input[readonly]{background:var(--indigo-bg);color:var(--indigo-dark);font-weight:800;border-style:dashed;}
+  header.topbar h1 { font-size: 20px; font-weight: 800; margin: 0; }
+  header.topbar p { margin: 2px 0 0; font-size: 12px; opacity: 0.85; }
   
-  .scan-input-wrap input{font-size:16px;letter-spacing:1.5px;font-weight:700;}
-  #scanAlert{margin-top:14px;padding:14px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;display:none;}
-  #scanAlert.show{display:block;}
-  #scanAlert.danger{background:var(--red-bg);color:var(--red);border:1px solid #fecaca;}
-  #scanAlert.success{background:var(--emerald-bg);color:var(--emerald-dark);border:1px solid #a7f3d0;}
-
-  .field{margin-bottom:16px;}
-  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:7px;}
-  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
-  .weekday-chips{display:flex;flex-wrap:wrap;gap:8px;}
-  .weekday-chips .chip{
-    display:flex;align-items:center;gap:6px;background:#f1f5f9;
-    border:1.5px solid var(--border);border-radius:30px;padding:8px 14px;
-    font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;
+  header.topbar .conn-status {
+    font-size: 13px; font-weight: 700; padding: 6px 14px; border-radius: 20px;
+    background: rgba(255,255,255,.18); display: flex; align-items: center; gap: 8px;
   }
-  .weekday-chips .chip input{display:none;}
-  .weekday-chips .chip.active{background:linear-gradient(120deg,var(--indigo),var(--purple));border-color:transparent;color:#fff;}
+  header.topbar .dot { width: 9px; height: 9px; border-radius: 50%; background: #cbd5e1; }
+  header.topbar .dot.on { background: #34d399; }
+  header.topbar .dot.off { background: #fca5a5; }
 
-  .btn{
-    font-family:'Cairo',sans-serif;border:none;border-radius:var(--radius-sm);
-    padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer;
-    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  /* الحاوية الرئيسية للمحتوى */
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 20px;
   }
-  .btn-primary{background:linear-gradient(120deg,var(--indigo),var(--purple));color:#fff;}
-  .btn-block{width:100%;margin-top:10px;}
-  .btn-ghost{background:#f1f5f9;color:var(--text);}
-  .btn-sm{padding:7px 10px;font-size:12px;border-radius:8px;}
-  .btn-whatsapp{background:#25D366;color:#fff;text-decoration:none;}
-  .btn-edit{background:var(--indigo-bg);color:var(--indigo-dark);}
-  .btn-delete{background:var(--red-bg);color:var(--red);}
 
-  #regMsg{margin-top:14px;font-size:13px;font-weight:700;display:none;padding:12px 14px;border-radius:var(--radius-sm);}
-  #regMsg.show{display:block;}
-  #regMsg.success{background:var(--emerald-bg);color:var(--emerald-dark);}
-  #regMsg.danger{background:var(--red-bg);color:var(--red);}
+  /* كروت الإحصائيات مستطيلة بعرض الشاشة */
+  .stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    width: 100% !important;
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .stat-card .icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .stat-card.students .icon { background: var(--indigo-bg); color: var(--indigo); }
+  .stat-card.revenue .icon { background: var(--emerald-bg); color: var(--emerald-dark); }
+  .stat-card .num { font-size: 28px; font-weight: 900; line-height: 1; }
+  .stat-card .label { font-size: 13px; color: var(--muted); font-weight: 700; margin-top: 4px; }
 
-  .table-panel{
-    background:var(--card);border-radius:var(--radius-lg);
-    border:1px solid var(--border-soft);box-shadow:var(--shadow-sm);padding:26px;
-    width:100%;
+  /* الشبكة الرئيسية */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    width: 100% !important;
   }
-  .table-panel .head-row{
-    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px;
+
+  .panel {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    width: 100% !important;
   }
-  .table-panel .head-row h2{margin:0;font-size:16.5px;font-weight:800;display:flex;align-items:center;gap:9px;}
+  .panel h2 {
+    font-size: 16px; font-weight: 800; margin: 0 0 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel .sub { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+
+  input, select {
+    font-family: 'Cairo', sans-serif;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    width: 100% !important;
+    background: #fbfcfe;
+    color: var(--text);
+  }
+  input:focus, select:focus { outline: none; border-color: var(--indigo); background: #fff; }
+  input[readonly] { background: var(--indigo-bg); color: var(--indigo-dark); font-weight: 800; }
   
-  .filters-bar{display:flex;gap:12px;flex-wrap:wrap;}
-  .filters-bar select, .filters-bar input{width:auto;min-width:180px;}
+  #scanAlert { margin-top: 12px; padding: 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; display: none; }
+  #scanAlert.show { display: block; }
+  #scanAlert.danger { background: var(--red-bg); color: var(--red); border: 1px solid #fecaca; }
+  #scanAlert.success { background: var(--emerald-bg); color: var(--emerald-dark); border: 1px solid #a7f3d0; }
 
-  .table-scroll{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border-soft);}
-  table{width:100%;border-collapse:collapse;min-width:1150px;font-size:13.5px;}
-  thead th{background:#f8fafc;color:var(--muted);font-weight:800;text-align:right;padding:16px 14px;border-bottom:1px solid var(--border-soft);white-space:nowrap;}
-  tbody td{padding:14px;border-bottom:1px solid var(--border-soft);vertical-align:middle;white-space:nowrap;}
-  tbody tr:hover{background:#f8fafc;}
-  .cell-input{width:65px;padding:6px;font-size:13px;border-radius:8px;}
-  .code-pill{background:var(--indigo-bg);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:800;color:var(--indigo-dark);}
-  .fee-btn{border:none;border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:800;cursor:pointer;}
-  .fee-btn.paid{background:var(--emerald-bg);color:var(--emerald-dark);}
-  .fee-btn.unpaid{background:var(--red-bg);color:var(--red);}
-  .row-actions{display:flex;gap:6px;}
-  .empty-row td{text-align:center;color:var(--muted);padding:40px;font-weight:600;}
-  footer{text-align:center;color:var(--muted-2);font-size:12.5px;padding:28px;font-weight:600;width:100%;}
+  .field { margin-bottom: 14px; width: 100%; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;
-    align-items:flex-start;justify-content:center;padding:46px 16px;z-index:999;overflow-y:auto;
+  .weekday-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .weekday-chips .chip {
+    display: flex; align-items: center; gap: 4px; background: #f1f5f9;
+    border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 12px;
+    font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer;
   }
-  .modal-overlay.show{display:flex;}
-  .modal-box{background:#fff;border-radius:22px;width:100%;max-width:500px;padding:30px;position:relative;}
-  .modal-close{position:absolute;top:20px;left:20px;background:#f1f5f9;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;}
+  .weekday-chips .chip input { display: none; }
+  .weekday-chips .chip.active { background: var(--indigo); border-color: transparent; color: #fff; }
+
+  .btn {
+    font-family: 'Cairo', sans-serif; border: none; border-radius: var(--radius-sm);
+    padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%;
+  }
+  .btn-primary { background: linear-gradient(120deg, var(--indigo), var(--purple)); color: #fff; }
+  .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 6px; width: auto; }
+  .btn-whatsapp { background: #25D366; color: #fff; text-decoration: none; }
+  .btn-edit { background: var(--indigo-bg); color: var(--indigo-dark); }
+  .btn-delete { background: var(--red-bg); color: var(--red); }
+
+  #regMsg { margin-top: 12px; font-size: 13px; font-weight: 700; display: none; padding: 10px; border-radius: var(--radius-sm); }
+  #regMsg.show { display: block; }
+  #regMsg.success { background: var(--emerald-bg); color: var(--emerald-dark); }
+  #regMsg.danger { background: var(--red-bg); color: var(--red); }
+
+  .table-panel {
+    background: var(--card); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-soft); box-shadow: var(--shadow-sm); padding: 20px;
+    width: 100% !important; overflow: hidden;
+  }
+  .table-panel .head-row {
+    display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;
+  }
+  
+  .filters-bar { display: flex; gap: 10px; flex-direction: column; }
+
+  .table-scroll { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-soft); width: 100%; }
+  table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 13px; }
+  thead th { background: #f8fafc; color: var(--muted); font-weight: 800; text-align: right; padding: 12px 10px; border-bottom: 1px solid var(--border-soft); }
+  tbody td { padding: 12px 10px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
+  .cell-input { width: 55px !important; padding: 4px 6px; font-size: 12px; text-align: center; }
+  .code-pill { background: var(--indigo-bg); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 800; color: var(--indigo-dark); }
+  .fee-btn { border: none; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 800; cursor: pointer; }
+  .fee-btn.paid { background: var(--emerald-bg); color: var(--emerald-dark); }
+  .fee-btn.unpaid { background: var(--red-bg); color: var(--red); }
+  .row-actions { display: flex; gap: 4px; }
+  .empty-row td { text-align: center; color: var(--muted); padding: 30px; font-weight: 600; }
+  
+  #debugBanner {
+    background: #fef2f2; color: #991b1b; padding: 10px 15px; font-size: 12px; font-weight: 700;
+    text-align: center; border-bottom: 1px solid #fecaca; display: none;
+  }
 </style>
 </head>
 <body>
+
+<div id="debugBanner"></div>
 
 <header class="topbar">
   <div class="brand">
     <div class="mark">ت</div>
     <div>
       <h1>سنتر التفوق التعليمي</h1>
-      <p>لوحة التحكم المركزية - إدارة الطلاب والحضور والمصاريف</p>
+      <p>لوحة التحكم المركزية - إدارة الطلاب</p>
     </div>
   </div>
   <div class="conn-status">
@@ -243,6 +238,7 @@
 </header>
 
 <main>
+  <!-- كروت الإحصائيات بالعرض الكامل -->
   <section class="stats">
     <div class="stat-card students">
       <div class="icon">👥</div>
@@ -261,77 +257,73 @@
   </section>
 
   <div class="grid">
-    <div>
-      <div class="panel">
-        <h2><span class="h-icon">📷</span> تسجيل الحضور بالباركود</h2>
-        <p class="sub">امسح الكود أو اكتبه واضغط Enter</p>
-        <div class="scan-input-wrap">
-          <input type="text" id="barcodeInput" placeholder="امسح كود الطالب هنا..." autocomplete="off" autofocus>
-        </div>
-        <div id="scanAlert"></div>
-      </div>
+    <div class="panel">
+      <h2>📷 تسجيل الحضور بالباركود</h2>
+      <p class="sub">امسح الكود أو اكتبه واضغط Enter</p>
+      <input type="text" id="barcodeInput" placeholder="امسح كود الطالب هنا..." autocomplete="off">
+      <div id="scanAlert"></div>
+    </div>
 
-      <div class="panel">
-        <h2><span class="h-icon">➕</span> تسجيل طالب جديد</h2>
-        <p class="sub">أدخل بيانات الطالب مع تحديد الصف الدراسي</p>
-        <form id="regForm">
-          <div class="field-row">
-            <div class="field">
-              <label>كود الطالب</label>
-              <input type="text" id="f_code" required>
-            </div>
-            <div class="field">
-              <label>اسم الطالب</label>
-              <input type="text" id="f_name" required>
-            </div>
+    <div class="panel">
+      <h2>➕ تسجيل طالب جديد</h2>
+      <p class="sub">أدخل بيانات الطالب مع تحديد الصف الدراسي</p>
+      <form id="regForm">
+        <div class="field-row">
+          <div class="field">
+            <label>كود الطالب</label>
+            <input type="text" id="f_code" required>
           </div>
           <div class="field">
-            <label>الصف الدراسي</label>
-            <select id="f_gradeLevel" required>
-              <option value="أول ثانوي">أول ثانوي</option>
-              <option value="ثاني ثانوي">ثاني ثانوي</option>
-              <option value="ثالث ثانوي">ثالث ثانوي</option>
-            </select>
+            <label>اسم الطالب</label>
+            <input type="text" id="f_name" required>
           </div>
-          <div class="field-row">
-            <div class="field">
-              <label>هاتف الطالب</label>
-              <input type="tel" id="f_studentPhone" placeholder="010xxxxxxxx">
-            </div>
-            <div class="field">
-              <label>هاتف ولي الأمر</label>
-              <input type="tel" id="f_guardianPhone" placeholder="010xxxxxxxx">
-            </div>
+        </div>
+        <div class="field">
+          <label>الصف الدراسي</label>
+          <select id="f_gradeLevel" required>
+            <option value="أول ثانوي">أول ثانوي</option>
+            <option value="ثاني ثانوي">ثاني ثانوي</option>
+            <option value="ثالث ثانوي">ثالث ثانوي</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>هاتف الطالب</label>
+            <input type="tel" id="f_studentPhone" placeholder="010xxxxxxxx">
           </div>
           <div class="field">
-            <label>مصاريف الشهر (ج.م)</label>
-            <input type="number" id="f_fees" min="0" required>
+            <label>هاتف ولي الأمر</label>
+            <input type="tel" id="f_guardianPhone" placeholder="010xxxxxxxx">
           </div>
-          <div class="field">
-            <label>أيام الحصص الأسبوعية</label>
-            <div class="weekday-chips" id="f_scheduleDays">
-              <label class="chip"><input type="checkbox" value="0"> الأحد</label>
-              <label class="chip"><input type="checkbox" value="1"> الاثنين</label>
-              <label class="chip"><input type="checkbox" value="2"> الثلاثاء</label>
-              <label class="chip"><input type="checkbox" value="3"> الأربعاء</label>
-              <label class="chip"><input type="checkbox" value="4"> الخميس</label>
-              <label class="chip"><input type="checkbox" value="5"> الجمعة</label>
-              <label class="chip"><input type="checkbox" value="6"> السبت</label>
-            </div>
+        </div>
+        <div class="field">
+          <label>مصاريف الشهر (ج.م)</label>
+          <input type="number" id="f_fees" min="0" required>
+        </div>
+        <div class="field">
+          <label>أيام الحصص الأسبوعية</label>
+          <div class="weekday-chips" id="f_scheduleDays">
+            <label class="chip"><input type="checkbox" value="0"> الأحد</label>
+            <label class="chip"><input type="checkbox" value="1"> الاثنين</label>
+            <label class="chip"><input type="checkbox" value="2"> الثلاثاء</label>
+            <label class="chip"><input type="checkbox" value="3"> الأربعاء</label>
+            <label class="chip"><input type="checkbox" value="4"> الخميس</label>
+            <label class="chip"><input type="checkbox" value="5"> الجمعة</label>
+            <label class="chip"><input type="checkbox" value="6"> السبت</label>
           </div>
-          <div class="field">
-            <label>إجمالي حصص الشهر</label>
-            <input type="number" id="f_totalSessions" readonly value="0">
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">حفظ الطالب</button>
-          <div id="regMsg"></div>
-        </form>
-      </div>
+        </div>
+        <div class="field">
+          <label>إجمالي حصص الشهر</label>
+          <input type="number" id="f_totalSessions" readonly value="0">
+        </div>
+        <button type="submit" class="btn btn-primary">حفظ الطالب</button>
+        <div id="regMsg"></div>
+      </form>
     </div>
 
     <div class="table-panel">
       <div class="head-row">
-        <h2><span class="h-icon" style="background:var(--emerald-bg);color:var(--emerald-dark);">📋</span> قائمة الطلاب</h2>
+        <h2>📋 قائمة الطلاب</h2>
         <div class="filters-bar">
           <select id="filterGradeLevel">
             <option value="all">جميع الصفوف الدراسية</option>
@@ -348,7 +340,7 @@
             <tr>
               <th>الكود</th>
               <th>الاسم</th>
-              <th>الصف الدراسي</th>
+              <th>الصف</th>
               <th>الهاتف</th>
               <th>الحصص</th>
               <th>الامتحان</th>
@@ -357,7 +349,7 @@
             </tr>
           </thead>
           <tbody id="studentsTbody">
-            <tr class="empty-row"><td colspan="8">جاري تحميل البيانات...</td></tr>
+            <tr class="empty-row"><td colspan="8">جاري اتصال القاعدة...</td></tr>
           </tbody>
         </table>
       </div>
@@ -365,76 +357,43 @@
   </div>
 </main>
 
-<footer>نظام سنتر التفوق التعليمي — مدعوم بقاعدة بيانات Firebase لحظياً</footer>
-
-<div class="modal-overlay" id="editModalOverlay">
-  <div class="modal-box">
-    <button type="button" class="modal-close" id="editModalClose">✕</button>
-    <h3>تعديل بيانات الطالب</h3>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:15px;">كود الطالب: <span id="editCodeLabel" style="font-weight:800;color:var(--indigo);"></span></p>
-    <form id="editForm">
-      <input type="hidden" id="e_code">
-      <div class="field">
-        <label>اسم الطالب</label>
-        <input type="text" id="e_name" required>
-      </div>
-      <div class="field">
-        <label>الصف الدراسي</label>
-        <select id="e_gradeLevel" required>
-          <option value="أول ثانوي">أول ثانوي</option>
-          <option value="ثاني ثانوي">ثاني ثانوي</option>
-          <option value="ثالث ثانوي">ثالث ثانوي</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>هاتف الطالب</label>
-          <input type="tel" id="e_studentPhone">
-        </div>
-        <div class="field">
-          <label>هاتف ولي الأمر</label>
-          <input type="tel" id="e_guardianPhone">
-        </div>
-      </div>
-      <div class="field">
-        <label>المصاريف (ج.م)</label>
-        <input type="number" id="e_fees" required>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:20px;">
-        <button type="button" class="btn btn-ghost" style="flex:1;" id="editCancelBtn">إلغاء</button>
-        <button type="submit" class="btn btn-primary" style="flex:1;">حفظ التغييرات</button>
-      </div>
-      <div id="editMsg" style="margin-top:10px;font-size:12px;font-weight:700;"></div>
-    </form>
-  </div>
-</div>
-
 <script>
+const debugBanner = document.getElementById('debugBanner');
+function showDebug(msg) {
+  debugBanner.style.display = 'block';
+  debugBanner.textContent = msg;
+}
+
 const firebaseConfig = {
   apiKey: "AIzaSyD6UDuCBns0_zdWOhnLOX3OtKelHs3hGmc",
   authDomain: "altafawuk-center.firebaseapp.com",
-  databaseURL: "https://altafawuk-center-default-rtdb.firebaseio.com/",
+  databaseURL: "https://altafawuk-center-default-rtdb.firebaseio.com",
   projectId: "altafawuk-center",
   storageBucket: "altafawuk-center.firebasestorage.app",
   messagingSenderId: "499180495752",
-  appId: "1:499180495752:web:b48e6d3b2d0a7f6cc103d",
-  measurementId: "G-69RJ1X96WM"
+  appId: "1:499180495752:web:b48e6d3b2d0a7f6cc103d"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-db.ref('.info/connected').on('value', (snap) => {
-  const dot = document.getElementById('connDot');
-  const text = document.getElementById('connText');
-  if (snap.val() === true) {
-    dot.className = 'dot on';
-    text.textContent = 'متصل بقاعدة البيانات';
-  } else {
-    dot.className = 'dot off';
-    text.textContent = 'غير متصل';
-  }
-});
+try {
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.database();
+  
+  // تجربة الاتصال المباشر
+  db.ref('.info/connected').on('value', (snap) => {
+    const dot = document.getElementById('connDot');
+    const text = document.getElementById('connText');
+    if (snap.val() === true) {
+      dot.className = 'dot on';
+      text.textContent = 'متصل بقاعدة البيانات';
+      debugBanner.style.display = 'none';
+    } else {
+      dot.className = 'dot off';
+      text.textContent = 'جاري الاتصال...';
+    }
+  });
+} catch(err) {
+  showDebug('خطأ في تهيئة القواعد: ' + err.message);
+}
 
 let allStudents = {};
 
@@ -487,24 +446,20 @@ regForm.addEventListener('submit', (e) => {
   const scheduleDays = getSelectedDays(f_scheduleDays);
   const totalSessions = computeMonthlySessions(scheduleDays);
 
-  if(!code || !name || !fees) return;
+  if(!code || !name) return;
 
-  db.ref('students/' + code).once('value').then(snap => {
-    if(snap.exists()) {
-      regMsg.className = 'show danger';
-      regMsg.textContent = 'هذا الكود مسجل مسبقاً!';
-      return;
-    }
-    db.ref('students/' + code).set({
-      code, name, gradeLevel, studentPhone, guardianPhone, fees,
-      feesPaid: false, scheduleDays, totalSessions, attendedSessions: 0, examGrade: 0
-    }).then(() => {
-      regMsg.className = 'show success';
-      regMsg.textContent = 'تم تسجيل الطالب بنجاح!';
-      regForm.reset();
-      f_scheduleDays.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      f_totalSessions.value = 0;
-    });
+  db.ref('students/' + code).set({
+    code, name, gradeLevel, studentPhone, guardianPhone, fees,
+    feesPaid: false, scheduleDays, totalSessions, attendedSessions: 0, examGrade: 0
+  }).then(() => {
+    regMsg.className = 'show success';
+    regMsg.textContent = 'تم تسجيل الطالب بنجاح!';
+    regForm.reset();
+    f_scheduleDays.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    f_totalSessions.value = 0;
+  }).catch(err => {
+    regMsg.className = 'show danger';
+    regMsg.textContent = 'خطأ في الحفظ: ' + err.message;
   });
 });
 
@@ -525,4 +480,75 @@ barcodeInput.addEventListener('keypress', (e) => {
         const newCount = (student.attendedSessions || 0) + 1;
         db.ref('students/' + code).update({ attendedSessions: newCount }).then(() => {
           scanAlert.className = 'show success';
-          scanAlert.textContent = `تم تسجيل حضور: ${s
+          scanAlert.textContent = `تم حضور: ${student.name} (${newCount} حصة)`;
+        });
+      }
+      barcodeInput.value = '';
+    });
+  }
+});
+
+db.ref('students').on('value', (snap) => {
+  allStudents = snap.val() || {};
+  renderTable();
+  updateStats();
+}, (err) => {
+  showDebug('فشل جلب البيانات: ' + err.message);
+});
+
+function updateStats() {
+  const keys = Object.keys(allStudents);
+  document.getElementById('statStudents').textContent = keys.length;
+  
+  let revenue = 0;
+  keys.forEach(k => {
+    if (allStudents[k].feesPaid) {
+      revenue += Number(allStudents[k].fees || 0);
+    }
+  });
+  document.getElementById('statRevenue').textContent = revenue;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('studentsTbody');
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const grade = document.getElementById('filterGradeLevel').value;
+
+  tbody.innerHTML = '';
+  const keys = Object.keys(allStudents);
+
+  if (keys.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">لا يوجد طلاب مسجلون حالياً.</td></tr>';
+    return;
+  }
+
+  let count = 0;
+  keys.forEach(k => {
+    const s = allStudents[k];
+    if (grade !== 'all' && s.gradeLevel !== grade) return;
+    if (search && !s.name.toLowerCase().includes(search) && !s.code.toLowerCase().includes(search)) return;
+
+    count++;
+    const tr = document.createElement('tr');
+    
+    tr.innerHTML = `
+      <td><span class="code-pill">${s.code}</span></td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.gradeLevel || '--'}</td>
+      <td>${s.studentPhone || '--'}</td>
+      <td>
+        <input type="number" class="cell-input" value="${s.attendedSessions || 0}" onchange="updateAttendance('${s.code}', this.value)">
+      </td>
+      <td>
+        <input type="number" class="cell-input" value="${s.examGrade || 0}" onchange="updateExam('${s.code}', this.value)">
+      </td>
+      <td>
+        <button class="fee-btn ${s.feesPaid ? 'paid' : 'unpaid'}" onclick="toggleFees('${s.code}', ${!s.feesPaid})">
+          ${s.feesPaid ? 'تم' : 'لم يدفع'}
+        </button>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="btn btn-sm btn-delete" onclick="deleteStudent('${s.code}')">حذف</button>
+        </div>
+      </td
