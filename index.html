@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الطلاب والحضور</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1, h2 { color: #333; text-align: center; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .scan-area { background: #e3f2fd; border: 2px dashed #2196f3; text-align: center; }
+        input[type="text"], input[type="number"], select { padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        button { padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #218838; }
+        .btn-whatsapp { background-color: #25d366; }
+        .btn-whatsapp:hover { background-color: #128c7e; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #007bff; color: white; }
+        .stats { display: flex; justify-content: space-around; font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>نظام إدارة المركز والتسجيل الذكي</h1>
+
+    <!-- إحصائيات الإيرادات والحضور -->
+    <div class="card stats">
+        <div>إجمالي الطلاب: <span id="total-students">0</span></div>
+        <div>إجمالي الإيرادات المحصلة: <span id="total-revenue">0</span> ج.م</div>
+    </div>
+
+    <!-- منطقة ماسح الباركود -->
+    <div class="card scan-area">
+        <h2>مسح الباركود لتسجيل الحضور فوراً</h2>
+        <input type="text" id="barcode-input" placeholder="وجه الماسح هنا..." autofocus>
+        <p id="scan-message" style="color: green; font-weight: bold;"></p>
+    </div>
+
+    <!-- إضافة طالب جديد -->
+    <div class="card">
+        <h3>إضافة / تعديل طالب</h3>
+        <form id="student-form">
+            <input type="text" id="student-code" placeholder="كود الطالب" required>
+            <input type="text" id="student-name" placeholder="اسم الطالب" required>
+            <input type="text" id="student-phone" placeholder="رقم الطالب" required>
+            <input type="text" id="parent-phone" placeholder="رقم ولي الأمر" required>
+            <input type="number" id="monthly-fee" placeholder="قيمة المصاريف" value="200" required>
+            <button type="submit">حفظ البيانات</button>
+        </form>
+    </div>
+
+    <!-- جدول بيانات الطلاب -->
+    <div class="card">
+        <h3>قائمة الطلاب والبيانات الحالية</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>الكود</th>
+                    <th>الاسم</th>
+                    <th>رقم ولي الأمر</th>
+                    <th>درجة الامتحان</th>
+                    <th>مصاريف الشهر</th>
+                    <th>مرات الحضور</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="students-table-body">
+                <!-- سيتم إدراج الطلاب هنا ديناميكياً -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let students = JSON.parse(localStorage.getItem('studentsData')) || [];
+
+    const barcodeInput = document.getElementById('barcode-input');
+    const scanMessage = document.getElementById('scan-message');
+    const studentForm = document.getElementById('student-form');
+
+    // التركيز الدائم على خانة الباركود
+    document.addEventListener('click', () => barcodeInput.focus());
+
+    // استقبال قراءة الباركود عند الضغط على Enter تلقائياً
+    barcodeInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const code = barcodeInput.value.trim();
+            if (code) {
+                registerAttendance(code);
+                barcodeInput.value = '';
+            }
+        }
+    });
+
+    // تسجيل الحضور تلقائياً
+    function registerAttendance(code) {
+        const student = students.find(s => s.code === code);
+        if (student) {
+            student.attendanceCount = (student.attendanceCount || 0) + 1;
+            const today = new Date().toLocaleDateString('ar-EG');
+            student.attendanceDates = student.attendanceDates || [];
+            student.attendanceDates.push(today);
+            
+            saveData();
+            renderTable();
+            scanMessage.innerText = `تم تسجيل حضور الطالب: ${student.name} بنجاح!`;
+        } else {
+            scanMessage.innerText = `عفواً، الكود (${code}) غير مسجل!`;
+            scanMessage.style.color = 'red';
+        }
+        setTimeout(() => { scanMessage.innerText = ''; scanMessage.style.color = 'green'; }, 3000);
+    }
+
+    // حفظ/تعديل طالب
+    studentForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const code = document.getElementById('student-code').value.trim();
+        const name = document.getElementById('student-name').value.trim();
+        const phone = document.getElementById('student-phone').value.trim();
+        const parentPhone = document.getElementById('parent-phone').value.trim();
+        const fee = parseFloat(document.getElementById('monthly-fee').value);
+
+        let student = students.find(s => s.code === code);
+        if (student) {
+            student.name = name;
+            student.phone = phone;
+            student.parentPhone = parentPhone;
+            student.fee = fee;
+        } else {
+            students.push({
+                code, name, phone, parentPhone, fee,
+                isPaid: false,
+                examScore: 'لم يحدد',
+                attendanceCount: 0,
+                attendanceDates: []
+            });
+        }
+
+        saveData();
+        renderTable();
+        studentForm.reset();
+    });
+
+    // حفظ البيانات في Storage
+    function saveData() {
+        localStorage.setItem('studentsData', JSON.stringify(students));
+        updateStats();
+    }
+
+    // تغيير حالة السداد
+    function togglePaid(index) {
+        students[index].isPaid = !students[index].isPaid;
+        saveData();
+        renderTable();
+    }
+
+    // تحديث درجة الامتحان
+    function updateScore(index, value) {
+        students[index].examScore = value;
+        saveData();
+    }
+
+    // إرسال تقرير الواتساب
+    function sendWhatsApp(index) {
+        const s = students[index];
+        const paidStatus = s.isPaid ? "تم السداد ✅" : "لم يتم السداد ❌";
+        const message = `تقرير الطالب: ${s.name}%0A` +
+                        `الكود: ${s.code}%0A` +
+                        `عدد حصص الحضور: ${s.attendanceCount || 0}%0A` +
+                        `درجة الامتحان: ${s.examScore}%0A` +
+                        `حالة المصاريف الشهرية: ${paidStatus}`;
+        
+        const url = `https://wa.me/${s.parentPhone}?text=${message}`;
+        window.open(url, '_blank');
+    }
+
+    // تحديث الإحصائيات والإيرادات
+    function updateStats() {
+        document.getElementById('total-students').innerText = students.length;
+        const totalRev = students.reduce((sum, s) => s.isPaid ? sum + (s.fee || 0) : sum, 0);
+        document.getElementById('total-revenue').innerText = totalRev;
+    }
+
+    // عرض الجدول
+    function renderTable() {
+        const tbody = document.getElementById('students-table-body');
+        tbody.innerHTML = '';
+
+        students.forEach((s, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${s.code}</td>
+                <td>${s.name}</td>
+                <td>${s.parentPhone}</td>
+                <td><input type="text" value="${s.examScore}" style="width:60px;" onchange="updateScore(${index}, this.value)"></td>
+                <td>
+                    <button style="background:${s.isPaid ? '#28a745' : '#dc3545'}" onclick="togglePaid(${index})">
+                        ${s.isPaid ? 'تم السداد' : 'لم يتم'}
+                    </button>
+                </td>
+                <td>${s.attendanceCount || 0}</td>
+                <td>
+                    <button class="btn-whatsapp" onclick="sendWhatsApp(${index})">واتساب 📱</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        updateStats();
+    }
+
+    // التشغيل المبدئي
+    renderTable();
+</script>
+
+</body>
+</html>
