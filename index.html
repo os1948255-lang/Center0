@@ -13,6 +13,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
+<!-- Libraries for Barcode & QR Code -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+
 <style>
   :root{
     --bg:#f8fafc;
@@ -144,11 +148,13 @@
   .btn {
     font-family: 'Cairo', sans-serif; border: none; border-radius: var(--radius-sm);
     padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center; width: 100%;
+    display: inline-flex; align-items: center; justify-content: center; width: 100%; gap: 4px;
   }
   .btn-primary { background: linear-gradient(120deg, var(--indigo), var(--purple)); color: #fff; }
   .btn-sm { padding: 5px 8px; font-size: 11px; border-radius: 6px; width: auto; }
   .btn-delete { background: var(--red-bg); color: var(--red); }
+  .btn-wa { background: #25D366; color: #fff; }
+  .btn-card { background: var(--indigo-bg); color: var(--indigo-dark); }
 
   #regMsg { margin-top: 10px; font-size: 12px; font-weight: 700; display: none; padding: 8px; border-radius: var(--radius-sm); }
   #regMsg.show { display: block; }
@@ -163,7 +169,7 @@
   .filters-bar { display: flex; gap: 8px; flex-direction: column; margin-bottom: 12px; }
 
   .table-scroll { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-soft); width: 100%; }
-  table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; min-width: 650px; font-size: 12px; }
   thead th { background: #f8fafc; color: var(--muted); font-weight: 800; text-align: right; padding: 10px 8px; border-bottom: 1px solid var(--border-soft); }
   tbody td { padding: 10px 8px; border-bottom: 1px solid var(--border-soft); vertical-align: middle; }
   .cell-input { width: 50px !important; padding: 4px; font-size: 11px; text-align: center; }
@@ -172,6 +178,31 @@
   .fee-btn.paid { background: var(--emerald-bg); color: var(--emerald-dark); }
   .fee-btn.unpaid { background: var(--red-bg); color: var(--red); }
   .empty-row td { text-align: center; color: var(--muted); padding: 20px; font-weight: 600; }
+
+  /* Modal for Student Card & Codes */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15,23,42,0.6); display: none; align-items: center; justify-content: center;
+    z-index: 9999; padding: 15px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: var(--radius-lg); padding: 20px; width: 100%; max-width: 420px;
+    text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+  .modal-close { position: absolute; top: 10px; left: 10px; border: none; background: #f1f5f9; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; }
+  .card-print-area { border: 2px dashed var(--indigo); border-radius: 12px; padding: 15px; background: #fafafa; margin: 15px 0; }
+  .card-print-area h3 { margin: 0 0 5px; color: var(--indigo); font-size: 16px; }
+  .card-print-area p { margin: 2px 0; font-size: 12px; font-weight: 700; }
+  .code-section { margin-top: 10px; }
+  .code-title { font-size: 11px; font-weight: 800; color: var(--muted); margin-bottom: 4px; }
+  canvas, svg { max-width: 100%; height: auto; }
+
+  /* Student Portal Mode */
+  #studentPortalView { display: none; }
+  body.portal-mode header.topbar { justify-content: center; }
+  body.portal-mode main { display: none; }
+  body.portal-mode #studentPortalView { display: block; padding: 20px 15px; }
 </style>
 </head>
 <body>
@@ -181,10 +212,10 @@
     <div class="mark">ت</div>
     <div>
       <h1>سنتر التفوق التعليمي</h1>
-      <p>لوحة التحكم المركزية</p>
+      <p id="topbarSub">لوحة التحكم المركزية</p>
     </div>
   </div>
-  <div class="conn-status">
+  <div class="conn-status" id="connStatusBox">
     <span class="dot off" id="connDot"></span>
     <span id="connText">جاري الاتصال...</span>
   </div>
@@ -211,7 +242,7 @@
   <div class="grid">
     <div class="panel">
       <h2>📷 تسجيل الحضور بالباركود</h2>
-      <p class="sub">امسح الكود أو اكتبه واضغط Enter</p>
+      <p class="sub">امسح الكود الخطي (1D) واضغط Enter</p>
       <input type="text" id="barcodeInput" placeholder="امسح كود الطالب هنا..." autocomplete="off">
       <div id="scanAlert"></div>
     </div>
@@ -306,6 +337,59 @@
   </div>
 </main>
 
+<!-- Student Portal View (Only for viewing single student via QR) -->
+<div id="studentPortalView">
+  <div class="panel" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <h2 id="stPortalName">بيانات الطالب</h2>
+    <p class="sub" id="stPortalGrade">الصف الدراسي</p>
+    <hr style="border: 0; border-top: 1px solid var(--border-soft); margin: 15px 0;">
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: right;">
+      <div style="background: var(--bg); padding: 10px; border-radius: 10px;">
+        <div style="font-size: 11px; color: var(--muted); font-weight: 700;">الكود الشخصي</div>
+        <div style="font-size: 16px; font-weight: 800; color: var(--indigo);" id="stPortalCode">--</div>
+      </div>
+      <div style="background: var(--bg); padding: 10px; border-radius: 10px;">
+        <div style="font-size: 11px; color: var(--muted); font-weight: 700;">حالة المصاريف</div>
+        <div style="font-size: 14px; font-weight: 800;" id="stPortalFees">--</div>
+      </div>
+      <div style="background: var(--bg); padding: 10px; border-radius: 10px;">
+        <div style="font-size: 11px; color: var(--muted); font-weight: 700;">حضور الحصص</div>
+        <div style="font-size: 16px; font-weight: 800; color: var(--emerald-dark);" id="stPortalAttendance">0 / 0</div>
+      </div>
+      <div style="background: var(--bg); padding: 10px; border-radius: 10px;">
+        <div style="font-size: 11px; color: var(--muted); font-weight: 700;">درجة الامتحان</div>
+        <div style="font-size: 16px; font-weight: 800; color: var(--purple);" id="stPortalExam">0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Printing Card and Barcodes -->
+<div class="modal-overlay" id="cardModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="card-print-area" id="printArea">
+      <h3>سنتر التفوق التعليمي</h3>
+      <p id="mStudentName">اسم الطالب</p>
+      <p style="color: var(--muted);" id="mStudentGrade">الصف الدراسي</p>
+      
+      <!-- 1D Barcode for Scanner -->
+      <div class="code-section">
+        <div class="code-title">باركود تسجيل الحضور (1D Scanner)</div>
+        <svg id="barcode1D"></svg>
+      </div>
+
+      <!-- 2D QR Code for Student Page -->
+      <div class="code-section" style="margin-top: 15px;">
+        <div class="code-title">كود QR لصفحة الطالب الفردية</div>
+        <canvas id="qrcode2D"></canvas>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ طباعة الكارت</button>
+  </div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyD6UDuCBns0_zdWOhnLOX3OtKelHs3hGmc",
@@ -318,11 +402,50 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-// تفعيل وضع Long-Polling لضمان عمل الخدمة تحت أي شبكة محجوبة
 db.settings({ experimentalForceLongPolling: true });
 
 let allStudents = {};
+
+// Check if visiting single student portal via URL parameter (?student=CODE)
+const urlParams = new URLSearchParams(window.location.search);
+const portalStudentCode = urlParams.get('student');
+
+if (portalStudentCode) {
+  document.body.classList.add('portal-mode');
+  document.getElementById('connStatusBox').style.display = 'none';
+  document.getElementById('topbarSub').textContent = 'بوابة متابعة الطالب';
+  
+  db.collection('students').doc(portalStudentCode).onSnapshot(doc => {
+    if (doc.exists) {
+      const s = doc.data();
+      document.getElementById('stPortalName').textContent = s.name;
+      document.getElementById('stPortalGrade').textContent = s.gradeLevel;
+      document.getElementById('stPortalCode').textContent = s.code;
+      document.getElementById('stPortalAttendance').textContent = `${s.attendedSessions || 0} / ${s.totalSessions || 0}`;
+      document.getElementById('stPortalExam').textContent = `${s.examGrade || 0} deg`;
+      
+      const feesEl = document.getElementById('stPortalFees');
+      feesEl.textContent = s.feesPaid ? 'تم السداد ✅' : 'غير مسدد ❌';
+      feesEl.style.color = s.feesPaid ? 'var(--emerald-dark)' : 'var(--red)';
+    } else {
+      document.getElementById('stPortalName').textContent = 'طالب غير موجود';
+    }
+  });
+} else {
+  // Admin Mode
+  db.collection('students').onSnapshot((snapshot) => {
+    setConnectedStatus(true);
+    allStudents = {};
+    snapshot.forEach((doc) => {
+      allStudents[doc.id] = doc.data();
+    });
+    renderTable();
+    updateStats();
+  }, (error) => {
+    setConnectedStatus(false);
+    console.error("Firestore Error: ", error);
+  });
+}
 
 function setConnectedStatus(isOnline) {
   const dot = document.getElementById('connDot');
@@ -335,20 +458,6 @@ function setConnectedStatus(isOnline) {
     text.textContent = 'غير متصل';
   }
 }
-
-// الاستماع المباشر لبيانات الطلاب من Cloud Firestore
-db.collection('students').onSnapshot((snapshot) => {
-  setConnectedStatus(true);
-  allStudents = {};
-  snapshot.forEach((doc) => {
-    allStudents[doc.id] = doc.data();
-  });
-  renderTable();
-  updateStats();
-}, (error) => {
-  setConnectedStatus(false);
-  console.error("Firestore Error: ", error);
-});
 
 function countWeekdayOccurrencesInMonth(weekday, year, month) {
   const date = new Date(year, month, 1);
@@ -403,7 +512,7 @@ regForm.addEventListener('submit', (e) => {
 
   db.collection('students').doc(code).set({
     code, name, gradeLevel, studentPhone, guardianPhone, fees,
-    feesPaid: false, scheduleDays, totalSessions, attendedSessions: 0, examGrade: 0
+    feesPaid: false, scheduleDays, totalSessions, attendedSessions: 0, examGrade: 0, lastAttendanceDate: ""
   }).then(() => {
     regMsg.className = 'show success';
     regMsg.textContent = 'تم تسجيل الطالب بنجاح!';
@@ -416,6 +525,7 @@ regForm.addEventListener('submit', (e) => {
   });
 });
 
+// Barcode Scanning with Duplicate Check per Day
 const barcodeInput = document.getElementById('barcodeInput');
 const scanAlert = document.getElementById('scanAlert');
 
@@ -424,17 +534,28 @@ barcodeInput.addEventListener('keypress', (e) => {
     const code = barcodeInput.value.trim();
     if (!code) return;
     
+    const todayStr = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    
     db.collection('students').doc(code).get().then(doc => {
       if(!doc.exists) {
         scanAlert.className = 'show danger';
-        scanAlert.textContent = 'الكود غير موجود في النظام!';
+        scanAlert.textContent = '❌ الكود غير موجود في النظام!';
       } else {
         const student = doc.data();
-        const newCount = (student.attendedSessions || 0) + 1;
-        db.collection('students').doc(code).update({ attendedSessions: newCount }).then(() => {
-          scanAlert.className = 'show success';
-          scanAlert.textContent = `تم تسجيل حضور: ${student.name}`;
-        });
+        
+        if (student.lastAttendanceDate === todayStr) {
+          scanAlert.className = 'show danger';
+          scanAlert.textContent = `⚠️ تنبيه: الطالب (${student.name}) مسجل حضور اليوم بالفعل!`;
+        } else {
+          const newCount = (student.attendedSessions || 0) + 1;
+          db.collection('students').doc(code).update({ 
+            attendedSessions: newCount,
+            lastAttendanceDate: todayStr 
+          }).then(() => {
+            scanAlert.className = 'show success';
+            scanAlert.textContent = `✅ تم تسجيل حضور الطالب: ${student.name}`;
+          });
+        }
       }
       barcodeInput.value = '';
     });
@@ -491,7 +612,9 @@ function renderTable() {
           ${s.feesPaid ? 'تم' : 'لم يدفع'}
         </button>
       </td>
-      <td>
+      <td style="display:flex; gap: 4px; flex-wrap: wrap;">
+        <button class="btn btn-sm btn-wa" title="إرسال تقرير لولي الأمر" onclick="sendWhatsApp('${s.code}')">📲</button>
+        <button class="btn btn-sm btn-card" title="عرض أشكال الباركود" onclick="openStudentCard('${s.code}')">🪪</button>
         <button class="btn btn-sm btn-delete" onclick="deleteStudent('${s.code}')">حذف</button>
       </td>
     `;
@@ -510,6 +633,67 @@ function updateAttendance(code, val) { db.collection('students').doc(code).updat
 function updateExam(code, val) { db.collection('students').doc(code).update({ examGrade: Number(val) }); }
 function toggleFees(code, status) { db.collection('students').doc(code).update({ feesPaid: status }); }
 function deleteStudent(code) { if (confirm('هل ترغب بحذف الطالب؟')) db.collection('students').doc(code).delete(); }
+
+// Send Monthly Report via WhatsApp
+function sendWhatsApp(code) {
+  const s = allStudents[code];
+  if (!s) return;
+  if (!s.guardianPhone) {
+    alert('لم يتم تسجيل رقم هاتف ولي الأمر لهذا الطالب!');
+    return;
+  }
+
+  let phone = s.guardianPhone.trim();
+  if (!phone.startsWith('+') && !phone.startsWith('2')) {
+    phone = '2' + phone; // Default to Egypt code (+20)
+  }
+
+  const msg = `السيد ولي أمر الطالب/ة: *${s.name}* 🎓
+تقرير متابعة الشهر من *سنتر التفوق التعليمي*:
+------------------------------------
+📌 *الصف الدراسي*: ${s.gradeLevel}
+📚 *حضور الحصص*: ${s.attendedSessions || 0} من أصل ${s.totalSessions || 0} حصة
+📝 *درجة الامتحان*: ${s.examGrade || 0}
+💰 *حالة المصاريف*: ${s.feesPaid ? 'تم السداد ✅' : 'لم يتم السداد ❌'}
+------------------------------------
+🔗 *رابط المتابعة المباشرة للطالب*:
+${window.location.origin}${window.location.pathname}?student=${s.code}
+
+شاكرين لكم حسن تعاونكم معنا!`;
+
+  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank');
+}
+
+// Open Modal to Show & Print Barcodes
+function openStudentCard(code) {
+  const s = allStudents[code];
+  if (!s) return;
+
+  document.getElementById('mStudentName').textContent = s.name;
+  document.getElementById('mStudentGrade').textContent = s.gradeLevel;
+
+  // Generate 1D Code128 Barcode for Attendance Scanner
+  JsBarcode("#barcode1D", s.code, {
+    format: "CODE128",
+    lineColor: "#000",
+    width: 2,
+    height: 50,
+    displayValue: true
+  });
+
+  // Generate 2D QR Code linking to Independent Student Page
+  const studentPortalUrl = `${window.location.origin}${window.location.pathname}?student=${s.code}`;
+  QRCode.toCanvas(document.getElementById('qrcode2D'), studentPortalUrl, { width: 120 }, function (error) {
+    if (error) console.error(error);
+  });
+
+  document.getElementById('cardModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('cardModal').classList.remove('active');
+}
 </script>
 </body>
 </html>
